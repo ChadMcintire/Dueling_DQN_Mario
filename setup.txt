@@ -1,0 +1,4 @@
+pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+pip3 install nes-py==8.1.8
+pip3 install gym==0.21.0
+pip3 install gym-super-mario-bros==7.4.0
