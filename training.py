@@ -31,17 +31,17 @@ def training_loop(env):
     agent = Dueling_DQN(n_frame, env, args)
 
     for k in range(num_epochs):
-        s = arrange(env.reset())
+        state = arrange(env.reset())
         done = False
 
         while not done:
-            a = agent.select_action(s, env, evaluation=False)
-            s_prime, r, done, _ = env.step(a)
-            s_prime = arrange(s_prime)
-            total_score += r
-            r = np.sign(r) * (np.sqrt(abs(r) +1) - 1) + 0.001 * r
-            memory.push((s, float(r), int(a), s_prime, int(1 - done)))
-            s = s_prime
+            action = agent.select_action(state, env, evaluation=False)
+            next_state, reward, done, _ = env.step(action)
+            next_state = arrange(next_state)
+            total_score += reward
+            reward = np.sign(reward) * (np.sqrt(abs(reward) +1) - 1) + 0.001 * reward
+            memory.push((state, float(reward), int(action), next_state, int(1 - done)))
+            state = next_state 
             stage = env.unwrapped._stage
             if len(memory) > 2000:
                 loss += agent.update_parameters(memory)
