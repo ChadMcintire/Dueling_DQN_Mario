@@ -8,13 +8,12 @@ import torch.nn.functional as F
 class Dueling_DQN(object):
     def __init__(self, n_frames, env, args):
         #Todo change parameter into arg parse arguments
-        learning_rate = 0.0001
-        self.gamma = 0.99
-        #self.device = device
+        learning_rate = args.lr
+        self.gamma = args.gamma
         self.device = torch.device('cuda' if torch.cuda.is_available() 
                                                            else 'cpu') 
-        self.batch_size = 256
-        self.eps = 0.001
+        self.batch_size = args.batch_size
+        self.eps = args.epsilon
         self.q = model(n_frames, env.action_space.n, self.device).to(self.device)
         self.q_target = model(n_frames, env.action_space.n, self.device).to(self.device)
         self.optimizer = optim.Adam(self.q.parameters(), lr=learning_rate)
@@ -27,20 +26,20 @@ class Dueling_DQN(object):
             if self.device == "cpu":
                 action = np.argmax(self.q(state).detach().numpy())
             else:
-                a = np.argmax(self.q(state).cpu().detach().numpy())
+                action = np.argmax(self.q(state).cpu().detach().numpy())
         return action
 
     def update_parameters(self, memory):
         state, reward, action, next_state, done = list(map(list, zip(*memory.sample(self.batch_size))))
-        state = np.array(s).squeeze()
+        state = np.array(state).squeeze()
         next_state = np.array(next_state).squeeze()
-        a_max = self.q(next_state).max(1)[1].unsqueeze(-1)
+        action_max = self.q(next_state).max(1)[1].unsqueeze(-1)
         reward = torch.FloatTensor(reward).unsqueeze(-1).to(self.device)
         done = torch.FloatTensor(done).unsqueeze(-1).to(self.device)
         with torch.no_grad():
-            y = reward + self.gamma * self.q_target(next_state).gather(1, a_max) * done
+            y = reward + self.gamma * self.q_target(next_state).gather(1, action_max) * done
         action = torch.tensor(action).unsqueeze(-1).to(self.device)
-        q_value = torch.gather(self.q(state), dim=1, index=a.view(-1, 1).long())
+        q_value = torch.gather(self.q(state), dim=1, index=action.view(-1, 1).long())
 
         loss = F.smooth_l1_loss(q_value, y).mean()
         self.optimizer.zero_grad()
@@ -51,7 +50,7 @@ class Dueling_DQN(object):
 
     def save_checkpoint(self,  suffix="", ckpt_path="checkpoints"):
         ch_pt = "check_points/" 
-        name = check_point1.pth
+        name = "check_point1.pth"
         if not os.path.exists(ch_pt + ckpt_path + "/"):
             os.makedirs(ch_pt + ckpt_path + "/")
         #if ckpt_path is None:

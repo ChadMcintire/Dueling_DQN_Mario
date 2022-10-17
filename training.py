@@ -4,28 +4,21 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
-from gym_super_mario_bros.actions import COMPLEX_MOVEMENT
-from nes_py.wrappers import JoypadSpace
-from wrappers import wrap_mario
 from utils import replay_memory, arrange, copy_weights
 from Dueling_DQN import Dueling_DQN
 import pickle
     
 
-def training_loop(env):
-    n_frame = 4
-    env = gym_super_mario_bros.make("SuperMarioBros-v0")
-    print(COMPLEX_MOVEMENT)
-    env = JoypadSpace(env, COMPLEX_MOVEMENT)
-    env = wrap_mario(env)
-    t = 0
-    buffer_size = 50000
-    update_interval = 50
-    print_interval = 10
+def training_loop(env, args):
+    n_frame = args.n_frame
+    time_step = 0
+    buffer_size = args.buffer_size
+    update_interval = args.update_interval 
+    print_interval = args.print_interval
     score_1st = []
     total_score = 0.0
     loss = 0.0
-    num_epochs = 7000
+    num_epochs = args.num_epochs
 
     memory = replay_memory(buffer_size)
     agent = Dueling_DQN(n_frame, env, args)
@@ -45,11 +38,12 @@ def training_loop(env):
             stage = env.unwrapped._stage
             if len(memory) > 2000:
                 loss += agent.update_parameters(memory)
-                t += 1
-            if t % update_interval == 0:
+                time_step += 1
+            if time_step % update_interval == 0:
                 copy_weights(agent.q, agent.q_target)
                 agent.save_checkpoint(suffix="", ckpt_path="checkpoints") 
 
+        #this should be replaced with a summary writer or similar
         if k % print_interval == 0:
             print(
                     "Epoch : %d | score : %f | loss : %.2f | stage : %d"
@@ -67,6 +61,3 @@ def training_loop(env):
             pickle.dump(score_1st, open("score.p", "wb"))
 
 
-if __name__ == "__main__":
-    args = {}
-    training_loop(args)
