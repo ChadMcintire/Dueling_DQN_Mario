@@ -1,7 +1,7 @@
 import argparse
 
 from training import training_loop
-#from execute_trained_model import run
+from execute_trained_model import run
 
 from gym_super_mario_bros.actions import COMPLEX_MOVEMENT
 from nes_py.wrappers import JoypadSpace
@@ -10,6 +10,7 @@ import gym_super_mario_bros
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--ch_pt", default="check_points/check_points/check_point1.pth", help="check point path relative to the main.py")
     parser.add_argument("--lr", default=0.0001, help="model learing rate (default=.0001)")
     parser.add_argument("--gamma", default=0.99, help="discount factor (default=.99)")
     parser.add_argument("--batch_size", default=256, type=int, help="Batch size for both actor and critic, (default is 256)")

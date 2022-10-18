@@ -71,9 +71,7 @@ class Dueling_DQN(object):
             if evaluate:
                 self.q.eval()
                 self.q_target.eval()
-                self.optimizer.eval()
 
             else:
                 self.q.train()
                 self.q_target.train()
-                self.optimizer.train()
