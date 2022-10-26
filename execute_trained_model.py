@@ -16,19 +16,20 @@ def run(env, args):
     #agent.load_checkpoint("./checkpoints.pth", evaluate=True)
     agent.load_checkpoint(checkpoint, evaluate=True)
 
-    total_score = 0.0
-    done = False
-    s = state = arrange(env.reset())
 
-    i = 0
-    while not done:
-        env.render()
-        action = agent.select_action(state, env, evaluation=False)
-        next_state, reward, done, _ = env.step(action)
-        next_state = arrange(next_state)
-        total_score += reward
-        state = next_state
-        time.sleep(0.01)
+    #i = 0
+    while True:
+        total_score = 0.0
+        done = False
+        s = state = arrange(env.reset())
+        while not done:
+            env.render()
+            action = agent.select_action(state, env, evaluation=False)
+            next_state, reward, done, _ = env.step(action)
+            next_state = arrange(next_state)
+            total_score += reward
+            state = next_state
+            time.sleep(0.01)
 
-    stage = env.unwrapped._stage
-    print("Total score : %f | stage : %d" % (total_score, stage))
+        stage = env.unwrapped._stage
+        print("Total score : %f | stage : %d" % (total_score, stage))
